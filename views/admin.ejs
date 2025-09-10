@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; min-height: 100vh; }
+    .sidebar { height: 100vh; position: fixed; top: 0; left: 0; width: 250px; background-color: #212529; padding-top: 20px; }
+    .main-content { margin-left: 250px; padding: 20px; }
+    .table th { background-color: #0d6efd; color: white; }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h4 class="text-white text-center mb-4">Admin Panel</h4>
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link text-white <%= title === 'User Management' ? 'active bg-primary' : '' %>" href="/admin/users">Manage Users</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white <%= title === 'Product Management' ? 'active bg-primary' : '' %>" href="/admin/products">Manage Products</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white <%= title === 'Blog Management' ? 'active bg-primary' : '' %>" href="/admin/blogs">Manage Blogs</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="/admin/users?action=newUser">Add New User</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="/admin/products?action=newProduct">Add New Product</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white" href="/admin/blogs?action=newBlog">Add New Blog</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="container-fluid">
+      <h1 class="mb-4"><%= title %></h1>
+      <div class="card">
+        <div class="card-body">
+          <% if (error) { %>
+            <div class="alert alert-danger"><%= error %></div>
+          <% } %>
+
+          <% if (title === 'User Management') { %>
+            <!-- User Management -->
+            <% if (action === 'newUser') { %>
+              <h2>Add New User</h2>
+              <form method="post" action="/admin/users/create">
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" name="email" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-control" name="age">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Password</label>
+                  <input type="password" class="form-control" name="password" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Role</label>
+                  <select class="form-select" name="role">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create User</button>
+                <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else if (action === 'editUser' && editUser) { %>
+              <h2>Edit User</h2>
+              <form method="post" action="/admin/users/update/<%= editUser._id %>">
+                <div class="mb-3">
+                  <label class="form-label">Email</label>
+                  <input type="email" class="form-control" name="email" value="<%= editUser.email %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" value="<%= editUser.name %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-control" name="age" value="<%= editUser.age %>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Password (leave blank to keep current)</label>
+                  <input type="password" class="form-control" name="password">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Role</label>
+                  <select class="form-select" name="role">
+                    <option value="User" <%= editUser.role === 'User' ? 'selected' : '' %>>User</option>
+                    <option value="Admin" <%= editUser.role === 'Admin' ? 'selected' : '' %>>Admin</option>
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update User</button>
+                <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else { %>
+              <form method="get" action="/admin/users" class="mb-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="q" placeholder="Search users" value="<%= q %>">
+                  <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+              </form>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Age</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (Array.isArray(users) && users.length > 0) { %>
+                      <% users.forEach(user => { %>
+                        <tr>
+                          <td><%= user.name %></td>
+                          <td><%= user.email %></td>
+                          <td><%= user.age %></td>
+                          <td><%= user.role %></td>
+                          <td>
+                            <a href="/admin/users/edit/<%= user._id %>" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal" data-id="<%= user._id %>" data-type="user">Delete</button>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="5" class=" konuştext-center">No users found</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              <a href="/admin/users?action=newUser" class="btn btn-primary mt-3">Add New User</a>
+            <% } %>
+
+          <% } else if (title === 'Product Management') { %>
+            <!-- Product Management -->
+            <% if (action === 'newProduct') { %>
+              <h2>Add New Product</h2>
+              <form method="post" action="/admin/products/create" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <input type="text" class="form-control" name="category" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Price</label>
+                  <input type="number" class="form-control" name="price" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Original Price</label>
+                  <input type="number" class="form-control" name="originalPrice">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Image</label>
+                  <input type="file" class="form-control" name="image" accept="image/*" required>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="sale" id="sale">
+                  <label class="form-check-label" for="sale">On Sale</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="newArrival" id="newArrival">
+                  <label class="form-check-label" for="newArrival">New Arrival</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="bestSeller" id="bestSeller">
+                  <label class="form-check-label" for="bestSeller">Best Seller</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Product</button>
+                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else if (action === 'editProduct' && product) { %>
+              <h2>Edit Product</h2>
+              <form method="post" action="/admin/products/update/<%= product._id %>" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" value="<%= product.name %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Category</label>
+                  <input type="text" class="form-control" name="category" value="<%= product.category %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Price</label>
+                  <input type="number" class="form-control" name="price" value="<%= product.price %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Original Price</label>
+                  <input type="number" class="form-control" name="originalPrice" value="<%= product.originalPrice %>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Current Image</label>
+                  <img src="<%= product.image %>" alt="<%= product.name %>" class="img-thumbnail" style="max-width: 100px;">
+                  <input type="hidden" name="existingImage" value="<%= product.image %>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">New Image (optional)</label>
+                  <input type="file" class="form-control" name="image" accept="image/*">
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="sale" id="sale" <%= product.sale ? 'checked' : '' %>>
+                  <label class="form-check-label" for="sale">On Sale</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="newArrival" id="newArrival" <%= product.newArrival ? 'checked' : '' %>>
+                  <label class="form-check-label" for="newArrival">New Arrival</label>
+                </div>
+                <div class="form-check mb-3">
+                  <input type="checkbox" class="form-check-input" name="bestSeller" id="bestSeller" <%= product.bestSeller ? 'checked' : '' %>>
+                  <label class="form-check-label" for="bestSeller">Best Seller</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Product</button>
+                <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else { %>
+              <form method="get" action="/admin/products" class="mb-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="q" placeholder="Search products" value="<%= q %>">
+                  <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+              </form>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (Array.isArray(products) && products.length > 0) { %>
+                      <% products.forEach(product => { %>
+                        <tr>
+                          <td><%= product.name %></td>
+                          <td><%= product.category %></td>
+                          <td><%= product.price %></td>
+                          <td>
+                            <a href="/admin/products/edit/<%= product._id %>" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal" data-id="<%= product._id %>" data-type="product">Delete</button>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="4" class="text-center">No products found</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              <a href="/admin/products?action=newProduct" class="btn btn-primary mt-3">Add New Product</a>
+            <% } %>
+
+          <% } else if (title === 'Blog Management') { %>
+            <!-- Blog Management -->
+            <% if (action === 'newBlog') { %>
+              <h2>Add New Blog</h2>
+              <form method="post" action="/admin/blogs/create" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" name="title" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" name="description" required></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Image</label>
+                  <input type="file" class="form-control" name="image" accept="image/*" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Content</label>
+                  <textarea class="form-control" name="content" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Blog</button>
+                <a href="/admin/blogs" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else if (action === 'editBlog' && blog) { %>
+              <h2>Edit Blog</h2>
+              <form method="post" action="/admin/blogs/update/<%= blog._id %>" enctype="multipart/form-data">
+                <div class="mb-3">
+                  <label class="form-label">Title</label>
+                  <input type="text" class="form-control" name="title" value="<%= blog.title %>" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Description</label>
+                  <textarea class="form-control" name="description" required><%= blog.description %></textarea>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Current Image</label>
+                  <img src="<%= blog.image %>" alt="<%= blog.title %>" class="img-thumbnail" style="max-width: 100px;">
+                  <input type="hidden" name="existingImage" value="<%= blog.image %>">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">New Image (optional)</label>
+                  <input type="file" class="form-control" name="image" accept="image/*">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Content</label>
+                  <textarea class="form-control" name="content" rows="5" required><%= blog.content %></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Blog</button>
+                <a href="/admin/blogs" class="btn btn-secondary">Cancel</a>
+              </form>
+            <% } else { %>
+              <form method="get" action="/admin/blogs" class="mb-3">
+                <div class="input-group">
+                  <input type="text" class="form-control" name="q" placeholder="Search blogs" value="<%= q %>">
+                  <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+              </form>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (Array.isArray(blogs) && blogs.length > 0) { %>
+                      <% blogs.forEach(blog => { %>
+                        <tr>
+                          <td><%= blog.title %></td>
+                          <td><%= blog.date ? blog.date.toDateString() : 'Unknown' %></td>
+                          <td>
+                            <a href="/admin/blogs/edit/<%= blog._id %>" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal" data-id="<%= blog._id %>" data-type="blog">Delete</button>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="3" class="text-center">No blogs found</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              <a href="/admin/blogs?action=newBlog" class="btn btn-primary mt-3">Add New Blog</a>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+
+      <footer class="mt-4 text-center text-muted">
+        <p>© 2024 Admin Panel. All rights reserved.</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this item?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <form id="deleteForm" method="post">
+            <button type="submit" class="btn btn-danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const id = button.getAttribute('data-id');
+      const type = button.getAttribute('data-type');
+      const form = document.getElementById('deleteForm');
+      form.action = `/admin/${type}s/delete/${id}`;
+    });
+  </script>
+</body>
+</html>
