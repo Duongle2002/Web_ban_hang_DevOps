@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    image: web_ban_hang:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes: []

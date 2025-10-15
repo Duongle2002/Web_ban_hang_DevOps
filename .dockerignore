@@ -1,4 +1,13 @@
 node_modules
+npm-debug.log
+yarn-error.log
+dist
+coverage
+.env
+.DS_Store
+docker-compose.override.yml
+Dockerfile.dev
+node_modules
 .git
 .gitignore
 *.log
