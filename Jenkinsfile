@@ -3,14 +3,9 @@ pipeline {
 
   options {
     timestamps()
-    ansiColor('xterm')
     timeout(time: 30, unit: 'MINUTES')
   }
 
-  triggers {
-    // Requires GitHub plugin; enables push-based builds via webhook
-    githubPush()
-  }
 
   environment {
     IMAGE_NAME   = 'web_ban_hang'
@@ -39,10 +34,9 @@ pipeline {
       steps {
         sh '''
           set -euxo pipefail
-          # Run tests using a clean Node image to ensure devDependencies are present
-          docker run --rm \
-            -v "$PWD":/app -w /app \
-            node:18 bash -lc "npm ci && npm test"
+          # Build a CI image that includes devDependencies and run tests inside it
+          docker build -f Dockerfile.ci -t ${IMAGE_NAME}:ci .
+          docker run --rm ${IMAGE_NAME}:ci
         '''
       }
     }
