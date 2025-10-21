@@ -1,8 +1,7 @@
 version: '3.8'
 services:
   web:
-    build: .
-    image: web_ban_hang:latest
+    image: ${IMAGE_NAME}:${IMAGE_TAG}
     ports:
       - "3000:3000"
     environment:
