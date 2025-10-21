@@ -34,22 +34,17 @@ pipeline {
       }
     }
     stage('Deploy (docker compose)') {
-      when {
-        anyOf {
-          branch 'main'
-          buildingTag()
-        }
-      }
-      environment {
-        IMAGE_NAME = 'web_ban_hang'
-        IMAGE_TAG = "${BUILD_NUMBER}"
-      }
       steps {
         sh '''
           set -euxo pipefail
           docker compose config
           docker compose up -d --remove-orphans
         '''
+      }
+    }
+    stage('Debug env') {
+      steps {
+        sh 'env | sort | grep -E "BRANCH|GIT_BRANCH|TAG|CHANGE" || true'
       }
     }
   }
