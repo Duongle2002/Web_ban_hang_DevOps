@@ -58,7 +58,7 @@ pipeline {
           docker compose config
           # Helper to wait for container health
           wait_health() {
-            for i in $(seq 1 24); do
+            for i in $(seq 1 60); do
               health=$(docker inspect --format '{{json .State.Health.Status}}' web_ban_hang || echo '"starting"')
               echo "Container health: $health"
               if [ "$health" = '"healthy"' ]; then
