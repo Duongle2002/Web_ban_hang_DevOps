@@ -34,13 +34,21 @@ pipeline {
       }
     }
     stage('Deploy (docker compose)') {
-      when { branch 'main' }
+      when {
+        anyOf {
+          branch 'main'
+          buildingTag()
+        }
+      }
+      environment {
+        IMAGE_NAME = 'web_ban_hang'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+      }
       steps {
         sh '''
           set -euxo pipefail
-          docker compose version
-          docker compose -f ${COMPOSE_FILE} down || true
-          docker compose -f ${COMPOSE_FILE} up -d
+          docker compose config
+          docker compose up -d --remove-orphans
         '''
       }
     }
