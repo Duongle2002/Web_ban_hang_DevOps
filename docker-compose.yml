@@ -6,7 +6,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - MONGO_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-root}:${MONGO_INITDB_ROOT_PASSWORD:-example}@mongo:27017/${MONGO_DB_NAME:-shop}?authSource=admin
+      - MONGO_URI=mongodb+srv://huuduongle2002:Duongmb8602@cluster0.andq2.mongodb.net/DevOps
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', res => { if (res.statusCode >= 200 && res.statusCode < 500) process.exit(0); else process.exit(1); }).on('error', () => process.exit(1));"]
