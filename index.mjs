@@ -3,6 +3,8 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import connectDB from './config/connectDB.mjs';
 import { getUserFromToken } from './middleware/authMiddleware.mjs';
 import addBaseUrl from './middleware/responseMiddleware.mjs';
@@ -25,14 +27,25 @@ dotenv.config();
 // Gọi connectDB trước khi sử dụng các route hoặc model
 connectDB().then(() => {
   // Cấu hình CORS: Cho phép tất cả origin
+  // Cấu hình CORS phục vụ frontend React (Vite) thay vì '*' + credentials (không hợp lệ trên trình duyệt)
+  const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean) || ['http://localhost:5173'];
   app.use(cors({
-    origin: '*', // Cho phép mọi origin
+    origin: function(origin, callback) {
+      // Cho phép origin null (ví dụ: curl, Postman) và origin nằm trong danh sách
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      console.warn('Blocked CORS origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   }));
 
   app.use(cookieParser());
+  // Security headers
+  app.use(helmet());
   app.use(express.static('public'));
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
@@ -47,6 +60,13 @@ connectDB().then(() => {
     console.log(`Received ${req.method} request to ${req.url}`);
     next();
   });
+
+  // Rate limiters
+  const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false });
+  const adminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200, standardHeaders: true, legacyHeaders: false });
+  app.use('/api/login', loginLimiter);
+  app.use('/api/register', loginLimiter);
+  app.use('/api/admin', adminLimiter);
 
   app.use('/api', apiRoutes);
   app.use('/', rootRoutes);

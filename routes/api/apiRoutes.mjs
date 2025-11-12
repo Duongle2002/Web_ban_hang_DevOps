@@ -1,5 +1,7 @@
 import express from 'express';
 import { cancelOrder, createCheckoutApi, getOrderDetailApi, getOrderHistoryApi } from '../../controllers/checkOutController.mjs';
+import { adminController, upload } from '../../controllers/adminController.mjs';
+import { listUsers, getUser, createUser, updateUser, deleteUser, listProducts, getProduct, createProduct, updateProduct, deleteProduct, listBlogs, getBlog, createBlog, updateBlog, deleteBlog } from '../../controllers/adminApiController.mjs';
 import ProductService from '../../services/ProductService.mjs';
 import { isAdmin, isAuthenticated } from '../../middleware/authMiddleware.mjs';
 import { getBlogDetailAPI, getBlogsAPI } from '../../controllers/blogController.mjs';
@@ -56,5 +58,26 @@ router.post('/history/:id/cancel', isAuthenticated, cancelOrder);
 // Blog APIs
 router.get('/blogs', getBlogsAPI);
 router.get('/blogs/:id', getBlogDetailAPI);
+
+// Admin JSON APIs (Users)
+router.get('/admin/users', isAuthenticated, isAdmin, listUsers);
+router.post('/admin/users', isAuthenticated, isAdmin, createUser);
+router.get('/admin/users/:id', isAuthenticated, isAdmin, getUser);
+router.put('/admin/users/:id', isAuthenticated, isAdmin, updateUser);
+router.delete('/admin/users/:id', isAuthenticated, isAdmin, deleteUser);
+
+// Admin JSON APIs (Products)
+router.get('/admin/products', isAuthenticated, isAdmin, listProducts);
+router.post('/admin/products', isAuthenticated, isAdmin, upload.single('image'), createProduct);
+router.get('/admin/products/:id', isAuthenticated, isAdmin, getProduct);
+router.put('/admin/products/:id', isAuthenticated, isAdmin, upload.single('image'), updateProduct);
+router.delete('/admin/products/:id', isAuthenticated, isAdmin, deleteProduct);
+
+// Admin JSON APIs (Blogs)
+router.get('/admin/blogs', isAuthenticated, isAdmin, listBlogs);
+router.post('/admin/blogs', isAuthenticated, isAdmin, upload.single('image'), createBlog);
+router.get('/admin/blogs/:id', isAuthenticated, isAdmin, getBlog);
+router.put('/admin/blogs/:id', isAuthenticated, isAdmin, upload.single('image'), updateBlog);
+router.delete('/admin/blogs/:id', isAuthenticated, isAdmin, deleteBlog);
 
 export default router;
