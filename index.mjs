@@ -45,7 +45,9 @@ connectDB().then(() => {
 
   app.use(cookieParser());
   // Security headers
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: false,
+  }));
   app.use(express.static('public'));
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
