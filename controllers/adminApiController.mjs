@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import UserService from '../services/UserService.mjs'
 import ProductService from '../services/ProductService.mjs'
 import BlogService from '../services/BlogService.mjs'

@@ -1,5 +1,5 @@
 import User from '../models/user.mjs';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 class UserService {
   static async getUsers(query = {}) {

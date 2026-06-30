@@ -97,7 +97,9 @@
                     <li class="nav-item"><a href="/product" class="nav-link">Products</a></li>
                     <li class="nav-item"><a href="/blog" class="nav-link">Blog</a></li>
                     <li class="nav-item"><a href="/contact" class="nav-link">Contact</a></li>
+                    <% if (user) { %>
                     <li class="nav-item"><a href="/history" class="nav-link">Order History</a></li>
+                    <% } %>
                     <li class="nav-item"><a href="/cart" class="nav-link">Cart</a></li>
                 </ul>
             </div>

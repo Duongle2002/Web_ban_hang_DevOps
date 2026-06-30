@@ -29,6 +29,9 @@ export default function Header() {
             <li className="nav-item"><NavLink className="nav-link" to="/product">Products</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/blog">Blog</NavLink></li>
             <li className="nav-item"><NavLink className="nav-link" to="/contact">Contact</NavLink></li>
+            {user && (
+              <li className="nav-item"><NavLink className="nav-link" to="/history">Order History</NavLink></li>
+            )}
             {user?.role === 'Admin' && (
               <li className="nav-item"><NavLink className="nav-link" to="/admin">Admin</NavLink></li>
             )}

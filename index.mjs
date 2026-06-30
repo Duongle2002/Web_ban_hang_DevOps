@@ -28,7 +28,21 @@ dotenv.config();
 connectDB().then(() => {
   // Cấu hình CORS: Cho phép tất cả origin
   // Cấu hình CORS phục vụ frontend React (Vite) thay vì '*' + credentials (không hợp lệ trên trình duyệt)
-  const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean) || ['http://localhost:5173'];
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://wine.duongle.io.vn',
+    'https://nodejs-ck-x8q8.onrender.com'
+  ];
+  if (process.env.CORS_ORIGINS) {
+    process.env.CORS_ORIGINS.split(',').forEach(o => {
+      const trimmed = o.trim();
+      if (trimmed && !allowedOrigins.includes(trimmed)) {
+        allowedOrigins.push(trimmed);
+      }
+    });
+  }
+
   app.use(cors({
     origin: function(origin, callback) {
       // Cho phép origin null (ví dụ: curl, Postman) và origin nằm trong danh sách
